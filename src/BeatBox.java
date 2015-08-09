@@ -1,81 +1,82 @@
-import java.awt.*;
+import java.awt.*; //imports
 import javax.swing.*;
 import javax.sound.midi.*;
 import java.util.*;
 import java.awt.event.*;
 
 public class BeatBox {
-	JPanel mainPanel;
+	JPanel mainPanel;					//for all the objects we are going to use and share
 	ArrayList<JCheckBox> checkboxList;
 	Sequencer sequencer;
 	Sequence sequence;
 	Track track;
 	JFrame theFrame;
-	
+										//arrays for the names and values of our instruments
 	String[] instrumentNames = {"Bass Drum", "Closed Hi-Hat", "Open Hi-Hat", "Acoustic Snare", "Crash Cymbal", "Hand Clap", "High Tom", "Hi Bongo", "Maracas", "Whistle", "Low Conga", "Cowbell", "Vibraslap", "Low-Mid Tom", "High Agogo", "Open Hi Conga"};
 	int[] instruments = {73,42,46,38,49,39,50,60,70,72,64,56,58,47,67,63};
 	
+										//main class creates an object and calls the GUI building method
 	public static void main(String args[]){
 		new BeatBox().buildGUI();
 	}
-	
+										//method to make a beautiful screen
 	public void buildGUI(){
-		theFrame = new JFrame("Almost as good as Adam's BeatBoxing skills");
-		theFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		BorderLayout layout = new BorderLayout();
+		theFrame = new JFrame("MusicMaker");		//name of the application
+		theFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	//so we can exit
+		BorderLayout layout = new BorderLayout();	
 		JPanel background = new JPanel(layout);
-		background.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+		background.setBorder(BorderFactory.createEmptyBorder(10,10,10,10)); //aesthetics
 		
-		checkboxList = new ArrayList<JCheckBox>();
-		Box buttonBox = new Box(BoxLayout.Y_AXIS);
+		checkboxList = new ArrayList<JCheckBox>();	//for my beats
+		Box buttonBox = new Box(BoxLayout.Y_AXIS);	//positioning of the buttonBox
 		
-		JButton start = new JButton("Start");
-		start.addActionListener(new MyStartListener());
-		buttonBox.add(start);
+		JButton start = new JButton("Start");		//button to start the sounds
+		start.addActionListener(new MyStartListener());	//add event listening
+		buttonBox.add(start);						//adds it to my layout for the buttons
 		
-		JButton stop = new JButton("Stop");
-		start.addActionListener(new MyStopListener());
+		JButton stop = new JButton("Stop");			//button to stop the sequencer
+		stop.addActionListener(new MyStopListener());
 		buttonBox.add(stop);
 		
-		JButton upTempo = new JButton("Tempo Up");
-		start.addActionListener(new MyUpTempoListener());
+		JButton upTempo = new JButton("Tempo Up");	//button to speed up the music
+		upTempo.addActionListener(new MyUpTempoListener());
 		buttonBox.add(upTempo);
 		
-		JButton downTempo = new JButton("Tempo Down");
-		start.addActionListener(new MyDownTempoListener());
+		JButton downTempo = new JButton("Tempo Down");	//button to slow down the music
+		downTempo.addActionListener(new MyDownTempoListener());
 		buttonBox.add(downTempo);
 		
-		Box nameBox = new Box(BoxLayout.Y_AXIS);
+		Box nameBox = new Box(BoxLayout.Y_AXIS);	//makes rows of checkboxes
 		for (int i = 0; i < 16; i++){
 			nameBox.add(new Label(instrumentNames[i]));
 		}
 
-		background.add(BorderLayout.EAST, buttonBox);
+		background.add(BorderLayout.EAST, buttonBox);	
 		background.add(BorderLayout.WEST, nameBox);
 		
-		theFrame.getContentPane().add(background);
+		theFrame.getContentPane().add(background);	
 		
-		GridLayout grid = new GridLayout(16,16);
-		grid.setVgap(1);
-		grid.setHgap(2);
-		mainPanel = new JPanel(grid);
+		GridLayout grid = new GridLayout(16,16);	
+		grid.setVgap(1);							//gap of 1 vertically
+		grid.setHgap(2);							//gap of 2 horizontally
+		mainPanel = new JPanel(grid);		
 		background.add(BorderLayout.CENTER, mainPanel);
 		
-		for (int i = 0; i < 256; i++){
-			JCheckBox c = new JCheckBox();
-			c.setSelected(false);
-			checkboxList.add(c);
-			mainPanel.add(c);
+		for (int i = 0; i < 256; i++){				//for loop to place the checkboxes
+			JCheckBox c = new JCheckBox();			//creates an object of the checkboxes
+			c.setSelected(false);					//makes them default not selected
+			checkboxList.add(c);					//adds to the checkboxlist
+			mainPanel.add(c);						//adds to the mainpanel
 		}
 		
 		setUpMidi();
 		
-		theFrame.setBounds(50,50,300,300);
-		theFrame.pack();
-		theFrame.setVisible(true);
+		theFrame.setBounds(50,50,30,296);			//sets size
+		theFrame.pack();					
+		theFrame.setVisible(true);					//so we can see it
 	}
 	
-	public void setUpMidi(){
+	public void setUpMidi(){						//standard midi things
 		try{
 			sequencer = MidiSystem.getSequencer();
 			sequencer.open();
@@ -84,16 +85,16 @@ public class BeatBox {
 			sequencer.setTempoInBPM(120);
 			
 		}
-		catch(Exception e){e.printStackTrace();}
+		catch(Exception e){e.printStackTrace();}	//in case of errors
 	}
 	
 	public void buildTrackAndStart(){
 		int[] trackList = null;
 		
-		sequence.deleteTrack(track);
-		track = sequence.createTrack();
+		sequence.deleteTrack(track);				//deletes previous track
+		track = sequence.createTrack();				//creates track
 		
-		for (int i = 0; i < 16; i++){
+		for (int i = 0; i < 16; i++){				//creates track out of the instruments
 			trackList= new int[16];
 			
 			int key = instruments[i];
@@ -121,36 +122,35 @@ public class BeatBox {
 		}catch(Exception e){e.printStackTrace();}
 	}
 	
-	public class MyStartListener implements ActionListener{
+	public class MyStartListener implements ActionListener{	//action listener for start button
 		public void actionPerformed(ActionEvent a){
 			buildTrackAndStart();
 		}
 		
 	}
 	
-	public class MyStopListener implements ActionListener{
+	public class MyStopListener implements ActionListener{	//action listener for stop button
 		public void actionPerformed(ActionEvent a){
 			sequencer.stop();
-			System.out.println("I SAID STOP!");
 		}
 	}
 	
-	public class MyUpTempoListener implements ActionListener{
+	public class MyUpTempoListener implements ActionListener{	//actionlistener for speedingup
 		public void actionPerformed(ActionEvent a){
 			float tempoFactor = sequencer.getTempoFactor();
-			sequencer.setTempoFactor((float)(tempoFactor * 2.03));
+			sequencer.setTempoFactor((float)(tempoFactor * 1.1));	//10% increase
 		}
 	}
 	
-	public class MyDownTempoListener implements ActionListener{
+	public class MyDownTempoListener implements ActionListener{	//actionlistener for speedingdown
 		public void actionPerformed(ActionEvent a){
 			float tempoFactor = sequencer.getTempoFactor();
-			sequencer.setTempoFactor((float)(tempoFactor * 0.3));
+			sequencer.setTempoFactor((float)(tempoFactor * 0.9));	//10% decrease
 		}
 	}
 
 
-	public void makeTracks(int[] list){
+	public void makeTracks(int[] list){	
 		for (int i = 0; i < 16; i++){
 			int key = list[i];
 			
